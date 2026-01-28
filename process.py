@@ -28,22 +28,23 @@ def process_data():
         return
 
     # 1. 处理 test.json (基准数据)
-    # 这一步建立一个已有URL的集合，用于后续去重
     existing_urls = set()
     current_max_priority = 0
     
     # 确保 data_test 是列表
     if not isinstance(data_test, list):
-        print("Test.json 格式错误，应为列表")
+        print("Test.json 格式错误，应为列表，尝试初始化为空列表")
         data_test = []
 
     for item in data_test:
+        if not isinstance(item, dict):
+            continue
         # 获取 URL 用于去重 (去除首尾空格)
         url = item.get("baseUrl", "").strip()
         if url:
             existing_urls.add(url)
         
-        # 获取当前最大优先级，以便后续追加
+        # 获取当前最大优先级
         p = item.get("priority", 0)
         if isinstance(p, int) and p > current_max_priority:
             current_max_priority = p
@@ -53,22 +54,28 @@ def process_data():
     # 2. 处理 jingjian.json 并转换格式
     new_items = []
     
-    # 确保 data_jingjian 是字典
     if isinstance(data_jingjian, dict):
         for key, value in data_jingjian.items():
+            # =========== 修复核心开始 ===========
+            # 增加类型检查：如果 value 不是字典（比如是版本号 int），则跳过
+            if not isinstance(value, dict):
+                # 可以在日志里打印跳过的项，方便调试
+                # print(f"跳过非字典项: {key}") 
+                continue
+            # =========== 修复核心结束 ===========
+
             # 提取关键字段
             api_url = value.get("api", "").strip()
             name = value.get("name", "")
             
             # --- 去重逻辑 ---
-            # 如果这个 API 地址已经在 test.json 里存在，则跳过
             if not api_url or api_url in existing_urls:
                 continue
             
             # --- 转换格式逻辑 ---
             current_max_priority += 1
             new_item = {
-                "id": key,  # 使用原数据的 key (域名) 作为 id
+                "id": key,
                 "name": name,
                 "baseUrl": api_url,
                 "group": "normal",
@@ -77,7 +84,6 @@ def process_data():
             }
             
             new_items.append(new_item)
-            # 添加到集合中，防止 jingjian.json 内部也有重复
             existing_urls.add(api_url)
     else:
         print("Jingjian.json 格式错误，应为字典")
