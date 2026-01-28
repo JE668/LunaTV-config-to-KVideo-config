@@ -41,5 +41,5 @@ jobs:
           git commit -m "Auto update merged.json"
           git push
         else
-          print("No changes detected")
+          echo "No changes detected"
         fi
