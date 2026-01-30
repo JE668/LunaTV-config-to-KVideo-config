@@ -1,9 +1,9 @@
 name: Update JSON Config
 
 on:
-  schedule:
+  # schedule:
     # 每天 UTC 时间 00:00 运行 (对应北京时间 08:00)
-    - cron: '0 0/6 * * *'
+    # - cron: '0 0/6 * * *'
   workflow_dispatch: # 允许手动点击按钮触发
 
 jobs:
